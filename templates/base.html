@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clinic Product Manager</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <i class="fas fa-clinic-medical"></i>
+          Clinic Manager
+        </div>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="{{ url_for('products') }}" class="nav-link">Products</a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('sold') }}" class="nav-link">Sold Products</a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('clinic') }}" class="nav-link"
+              >Clinic Products</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="main-content">{% block content %}{% endblock %}</main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>

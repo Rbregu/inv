@@ -1,0 +1,174 @@
+{% extends "base.html" %} {% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1><i class="fas fa-hospital-alt"></i> Products in Clinic</h1>
+    <p>Products currently released to the clinic</p>
+  </div>
+
+  <!-- Search Box -->
+  <div class="search-container">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="clinicSearchInput"
+        placeholder="Search clinic products by name..."
+        onkeyup="searchClinicProducts()"
+      />
+      <div id="clinicSearchResults" class="search-results"></div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="clinicProductsTable">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Date & Time Released (Albania)</th>
+        </tr>
+      </thead>
+      <tbody id="clinicProductsBody">
+        {% for product in clinic_products %}
+        <tr
+          class="clinic-product-row"
+          data-product-name="{{ product.name.lower() }}"
+        >
+          <td class="product-name">{{ product.name }}</td>
+          <td>{{ product.date_time }}</td>
+        </tr>
+        {% else %}
+        <tr id="noClinicData">
+          <td colspan="2" class="no-data">No products in clinic</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Store all products for filtering
+  let allClinicProducts = [];
+  {% for product in clinic_products %}
+  allClinicProducts.push({
+      name: "{{ product.name }}",
+      date_time: "{{ product.date_time }}"
+  });
+  {% endfor %}
+
+  function searchClinicProducts() {
+      const input = document.getElementById('clinicSearchInput');
+      const query = input.value.toLowerCase().trim();
+      const resultsContainer = document.getElementById('clinicSearchResults');
+      const tableBody = document.getElementById('clinicProductsBody');
+      const noDataRow = document.getElementById('noClinicData');
+
+      // Clear previous results
+      resultsContainer.innerHTML = '';
+
+      if (query.length < 1) {
+          // Show all products when search is empty
+          renderClinicProducts(allClinicProducts);
+          return;
+      }
+
+      // Find matching products for dropdown
+      const matchingProducts = allClinicProducts.filter(product =>
+          product.name.toLowerCase().includes(query)
+      );
+
+      // Show search results dropdown
+      if (matchingProducts.length > 0) {
+          matchingProducts.forEach(product => {
+              const div = document.createElement('div');
+              div.className = 'search-result-item';
+              div.textContent = product.name;
+              div.onclick = () => {
+                  input.value = product.name;
+                  resultsContainer.innerHTML = '';
+                  // Filter table to show only this product
+                  filterClinicTable(product.name);
+              };
+              resultsContainer.appendChild(div);
+          });
+      } else {
+          const noResult = document.createElement('div');
+          noResult.className = 'search-result-item';
+          noResult.textContent = 'No products found';
+          resultsContainer.appendChild(noResult);
+      }
+
+      // Also filter the table in real-time as user types
+      filterClinicTable(query);
+  }
+
+  function filterClinicTable(filter) {
+      const tableBody = document.getElementById('clinicProductsBody');
+      const noDataRow = document.getElementById('noClinicData');
+
+      if (filter === '') {
+          renderClinicProducts(allClinicProducts);
+          return;
+      }
+
+      const filteredProducts = allClinicProducts.filter(product =>
+          product.name.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      renderClinicProducts(filteredProducts);
+  }
+
+  function renderClinicProducts(products) {
+      const tableBody = document.getElementById('clinicProductsBody');
+      const noDataRow = document.getElementById('noClinicData');
+
+      tableBody.innerHTML = '';
+
+      if (products.length === 0) {
+          if (!noDataRow) {
+              const row = document.createElement('tr');
+              row.id = 'noClinicData';
+              const cell = document.createElement('td');
+              cell.colSpan = 2;
+              cell.className = 'no-data';
+              cell.textContent = 'No products found';
+              row.appendChild(cell);
+              tableBody.appendChild(row);
+          } else {
+              noDataRow.style.display = '';
+              noDataRow.querySelector('.no-data').textContent = 'No products found';
+          }
+          return;
+      }
+
+      // Hide the original no data row if it exists
+      if (noDataRow) {
+          noDataRow.style.display = 'none';
+      }
+
+      products.forEach(product => {
+          const row = document.createElement('tr');
+          row.className = 'clinic-product-row';
+          row.setAttribute('data-product-name', product.name.toLowerCase());
+
+          const nameCell = document.createElement('td');
+          nameCell.className = 'product-name';
+          nameCell.textContent = product.name;
+
+          const dateCell = document.createElement('td');
+          dateCell.textContent = product.date_time;
+
+          row.appendChild(nameCell);
+          row.appendChild(dateCell);
+          tableBody.appendChild(row);
+      });
+  }
+
+  // Close search results when clicking outside
+  document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-box')) {
+          document.getElementById('clinicSearchResults').innerHTML = '';
+      }
+  });
+</script>
+{% endblock %}

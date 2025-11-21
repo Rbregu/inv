@@ -1,0 +1,182 @@
+{% extends "base.html" %} {% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1><i class="fas fa-boxes"></i> Product Management</h1>
+    <p>Manage your clinic's products efficiently</p>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button class="btn btn-primary" onclick="openModal('addProductModal')">
+      <i class="fas fa-plus"></i> Add Product
+    </button>
+    <button class="btn btn-success" onclick="openModal('sellProductModal')">
+      <i class="fas fa-cash-register"></i> Sell Product
+    </button>
+    <button class="btn btn-warning" onclick="openModal('clinicProductModal')">
+      <i class="fas fa-hospital"></i> Send to Clinic
+    </button>
+  </div>
+
+  <!-- Products Table -->
+  <div class="table-container">
+    <h2 class="table-title">Registered Products</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Quantity</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for product in products %}
+        <tr>
+          <td>{{ product.name }}</td>
+          <td>{{ product.quantity }}</td>
+          <td>
+            <span
+              class="status-badge status-{% if product.quantity > 10 %}in-stock{% elif product.quantity > 0 %}low-stock{% else %}out-of-stock{% endif %}"
+            >
+              {% if product.quantity > 10 %}In Stock {% elif product.quantity >
+              0 %}Low Stock {% else %}Out of Stock{% endif %}
+            </span>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" class="no-data">
+            No products available. Click "Add Product" to get started.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <!-- Add Product Modal -->
+  <div id="addProductModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add New Product</h2>
+        <span class="close" onclick="closeModal('addProductModal')"
+          >&times;</span
+        >
+      </div>
+      <div class="modal-body">
+        <form id="addProductForm">
+          <div class="form-group">
+            <label for="productName">Product Name:</label>
+            <input type="text" id="productName" name="productName" required />
+          </div>
+          <div class="form-group">
+            <label for="productQuantity">Quantity:</label>
+            <input
+              type="number"
+              id="productQuantity"
+              name="productQuantity"
+              min="1"
+              required
+            />
+          </div>
+          <div class="form-actions">
+            <button
+              type="button"
+              onclick="closeModal('addProductModal')"
+              class="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">Add Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sell Product Modal -->
+  <div id="sellProductModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Sell Product</h2>
+        <span class="close" onclick="closeModal('sellProductModal')"
+          >&times;</span
+        >
+      </div>
+      <div class="modal-body">
+        <form id="sellProductForm">
+          <div class="form-group">
+            <label for="sellProductSearch">Search Product:</label>
+            <input
+              type="text"
+              id="sellProductSearch"
+              name="sellProductSearch"
+              placeholder="Type product name..."
+              onkeyup="searchProducts(this.value, 'sellResults')"
+            />
+            <div id="sellResults" class="search-results"></div>
+          </div>
+          <div class="form-group">
+            <label for="sellQuantity">Quantity:</label>
+            <input
+              type="number"
+              id="sellQuantity"
+              name="sellQuantity"
+              min="1"
+              required
+            />
+          </div>
+          <div class="form-actions">
+            <button
+              type="button"
+              onclick="closeModal('sellProductModal')"
+              class="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-success">Sell Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Send to Clinic Modal -->
+  <div id="clinicProductModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Send Product to Clinic</h2>
+        <span class="close" onclick="closeModal('clinicProductModal')"
+          >&times;</span
+        >
+      </div>
+      <div class="modal-body">
+        <form id="clinicProductForm">
+          <div class="form-group">
+            <label for="clinicProductSearch">Search Product:</label>
+            <input
+              type="text"
+              id="clinicProductSearch"
+              name="clinicProductSearch"
+              placeholder="Type product name..."
+              onkeyup="searchProducts(this.value, 'clinicResults')"
+            />
+            <div id="clinicResults" class="search-results"></div>
+          </div>
+          <div class="form-actions">
+            <button
+              type="button"
+              onclick="closeModal('clinicProductModal')"
+              class="btn btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-warning">
+              Send to Clinic
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+</div>

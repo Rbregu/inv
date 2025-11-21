@@ -1,0 +1,181 @@
+{% extends "base.html" %} {% block content %}
+<div class="container">
+  <div class="page-header">
+    <h1><i class="fas fa-receipt"></i> Sold Products</h1>
+    <p>History of all sold products</p>
+  </div>
+
+  <!-- Search Box -->
+  <div class="search-container">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        id="soldSearchInput"
+        placeholder="Search sold products by name..."
+        onkeyup="searchSoldProducts()"
+      />
+      <div id="soldSearchResults" class="search-results"></div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="data-table" id="soldProductsTable">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Quantity</th>
+          <th>Date & Time (Albania)</th>
+        </tr>
+      </thead>
+      <tbody id="soldProductsBody">
+        {% for product in sold_products %}
+        <tr
+          class="sold-product-row"
+          data-product-name="{{ product.name.lower() }}"
+        >
+          <td class="product-name">{{ product.name }}</td>
+          <td>{{ product.quantity }}</td>
+          <td>{{ product.date_time }}</td>
+        </tr>
+        {% else %}
+        <tr id="noSoldData">
+          <td colspan="3" class="no-data">No sold products recorded</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Store all products for filtering
+  let allSoldProducts = [];
+  {% for product in sold_products %}
+  allSoldProducts.push({
+      name: "{{ product.name }}",
+      quantity: {{ product.quantity }},
+      date_time: "{{ product.date_time }}"
+  });
+  {% endfor %}
+
+  function searchSoldProducts() {
+      const input = document.getElementById('soldSearchInput');
+      const query = input.value.toLowerCase().trim();
+      const resultsContainer = document.getElementById('soldSearchResults');
+      const tableBody = document.getElementById('soldProductsBody');
+      const noDataRow = document.getElementById('noSoldData');
+
+      // Clear previous results
+      resultsContainer.innerHTML = '';
+
+      if (query.length < 1) {
+          // Show all products when search is empty
+          renderSoldProducts(allSoldProducts);
+          return;
+      }
+
+      // Find matching products for dropdown
+      const matchingProducts = allSoldProducts.filter(product =>
+          product.name.toLowerCase().includes(query)
+      );
+
+      // Show search results dropdown
+      if (matchingProducts.length > 0) {
+          matchingProducts.forEach(product => {
+              const div = document.createElement('div');
+              div.className = 'search-result-item';
+              div.textContent = product.name;
+              div.onclick = () => {
+                  input.value = product.name;
+                  resultsContainer.innerHTML = '';
+                  // Filter table to show only this product
+                  filterSoldTable(product.name);
+              };
+              resultsContainer.appendChild(div);
+          });
+      } else {
+          const noResult = document.createElement('div');
+          noResult.className = 'search-result-item';
+          noResult.textContent = 'No products found';
+          resultsContainer.appendChild(noResult);
+      }
+
+      // Also filter the table in real-time as user types
+      filterSoldTable(query);
+  }
+
+  function filterSoldTable(filter) {
+      const tableBody = document.getElementById('soldProductsBody');
+      const noDataRow = document.getElementById('noSoldData');
+
+      if (filter === '') {
+          renderSoldProducts(allSoldProducts);
+          return;
+      }
+
+      const filteredProducts = allSoldProducts.filter(product =>
+          product.name.toLowerCase().includes(filter.toLowerCase())
+      );
+
+      renderSoldProducts(filteredProducts);
+  }
+
+  function renderSoldProducts(products) {
+      const tableBody = document.getElementById('soldProductsBody');
+      const noDataRow = document.getElementById('noSoldData');
+
+      tableBody.innerHTML = '';
+
+      if (products.length === 0) {
+          if (!noDataRow) {
+              const row = document.createElement('tr');
+              row.id = 'noSoldData';
+              const cell = document.createElement('td');
+              cell.colSpan = 3;
+              cell.className = 'no-data';
+              cell.textContent = 'No products found';
+              row.appendChild(cell);
+              tableBody.appendChild(row);
+          } else {
+              noDataRow.style.display = '';
+              noDataRow.querySelector('.no-data').textContent = 'No products found';
+          }
+          return;
+      }
+
+      // Hide the original no data row if it exists
+      if (noDataRow) {
+          noDataRow.style.display = 'none';
+      }
+
+      products.forEach(product => {
+          const row = document.createElement('tr');
+          row.className = 'sold-product-row';
+          row.setAttribute('data-product-name', product.name.toLowerCase());
+
+          const nameCell = document.createElement('td');
+          nameCell.className = 'product-name';
+          nameCell.textContent = product.name;
+
+          const quantityCell = document.createElement('td');
+          quantityCell.textContent = product.quantity;
+
+          const dateCell = document.createElement('td');
+          dateCell.textContent = product.date_time;
+
+          row.appendChild(nameCell);
+          row.appendChild(quantityCell);
+          row.appendChild(dateCell);
+          tableBody.appendChild(row);
+      });
+  }
+
+  // Close search results when clicking outside
+  document.addEventListener('click', function(e) {
+      if (!e.target.closest('.search-box')) {
+          document.getElementById('soldSearchResults').innerHTML = '';
+      }
+  });
+</script>
+{% endblock %}
