@@ -213,3 +213,11 @@ document
 document.addEventListener("DOMContentLoaded", function () {
   // Any initialization code if needed
 });
+// Initialize when page loads
+document.addEventListener("DOMContentLoaded", function () {
+  // Any initialization code if needed
+});
+
+setInterval(() => {
+  fetch("/keep-alive"); // hit a lightweight endpoint on your server
+}, 240000);
