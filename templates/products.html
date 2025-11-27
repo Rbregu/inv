@@ -1,13 +1,12 @@
 {% extends "base.html" %} {% block content %}
 
-<div class="container">
+<div class="container product-management-page">
   <div class="page-header">
     <h1><i class="fas fa-boxes"></i> Product Management</h1>
     <p>Manage your clinic's products efficiently</p>
   </div>
 
-  <!-- Action Buttons -->
-  <div class="action-buttons">
+  <section class="action-buttons" aria-label="Inventory Actions">
     <button class="btn btn-primary" onclick="openModal('addProductModal')">
       <i class="fas fa-plus"></i> Add Product
     </button>
@@ -17,30 +16,33 @@
     <button class="btn btn-warning" onclick="openModal('clinicProductModal')">
       <i class="fas fa-hospital"></i> Send to Clinic
     </button>
-  </div>
+  </section>
 
-  <!-- Products Table -->
-  <div class="table-container">
+  <section class="table-container" aria-label="Registered Products Inventory">
     <h2 class="table-title">Registered Products</h2>
-    <table class="data-table">
+    <table class="data-table" id="inventoryTable">
       <thead>
         <tr>
-          <th>Product Name</th>
-          <th>Quantity</th>
-          <th>Status</th>
+          <th scope="col">Product Name</th>
+          <th scope="col">Quantity</th>
+          <th scope="col">Status</th>
         </tr>
       </thead>
       <tbody>
         {% for product in products %}
         <tr>
-          <td>{{ product.name }}</td>
-          <td>{{ product.quantity }}</td>
-          <td>
-            <span
-              class="status-badge status-{% if product.quantity > 10 %}in-stock{% elif product.quantity > 0 %}low-stock{% else %}out-of-stock{% endif %}"
-            >
-              {% if product.quantity > 10 %}In Stock {% elif product.quantity >
-              0 %}Low Stock {% else %}Out of Stock{% endif %}
+          <td data-label="Product Name">{{ product.name }}</td>
+          <td data-label="Quantity">{{ product.quantity }}</td>
+          <td data-label="Status">
+            {% set status_class = 'out-of-stock' %} {% set status_text = 'Out of
+            Stock' %} {# 1. JINJA OPTIMIZATION: Use conditional logic for status
+            setting #} {% if product.quantity > 10 %} {% set status_class =
+            'in-stock' %} {% set status_text = 'In Stock' %} {% elif
+            product.quantity > 0 %} {% set status_class = 'low-stock' %} {% set
+            status_text = 'Low Stock' %} {% endif %}
+
+            <span class="status-badge status-{{ status_class }}">
+              {{ status_text }}
             </span>
           </td>
         </tr>
@@ -53,21 +55,38 @@
         {% endfor %}
       </tbody>
     </table>
-  </div>
-  <!-- Add Product Modal -->
-  <div id="addProductModal" class="modal">
+  </section>
+
+  {# --- Add Product Modal --- #}
+  <div
+    id="addProductModal"
+    class="modal"
+    role="dialog"
+    aria-labelledby="addProductHeader"
+  >
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Add New Product</h2>
-        <span class="close" onclick="closeModal('addProductModal')"
-          >&times;</span
+        <h2 id="addProductHeader">Add New Product</h2>
+        <button
+          type="button"
+          class="close"
+          onclick="closeModal('addProductModal')"
+          aria-label="Close"
         >
+          &times;
+        </button>
       </div>
       <div class="modal-body">
         <form id="addProductForm">
           <div class="form-group">
             <label for="productName">Product Name:</label>
-            <input type="text" id="productName" name="productName" required />
+            <input
+              type="text"
+              id="productName"
+              name="productName"
+              required
+              aria-required="true"
+            />
           </div>
           <div class="form-group">
             <label for="productQuantity">Quantity:</label>
@@ -77,6 +96,7 @@
               name="productQuantity"
               min="1"
               required
+              aria-required="true"
             />
           </div>
           <div class="form-actions">
@@ -94,26 +114,34 @@
     </div>
   </div>
 
-  <!-- Sell Product Modal -->
-  <div id="sellProductModal" class="modal">
+  {# --- Sell Product Modal --- #}
+  <div
+    id="sellProductModal"
+    class="modal"
+    role="dialog"
+    aria-labelledby="sellProductHeader"
+  >
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Sell Product</h2>
-        <span class="close" onclick="closeModal('sellProductModal')"
-          >&times;</span
+        <h2 id="sellProductHeader">Sell Product</h2>
+        <button
+          type="button"
+          class="close"
+          onclick="closeModal('sellProductModal')"
+          aria-label="Close"
         >
+          &times;
+        </button>
       </div>
       <div class="modal-body">
         <form id="sellProductForm">
-          <div class="form-group">
+          <div class="form-group search-group">
             <label for="sellProductSearch">Search Product:</label>
-            <input
-              type="text"
-              id="sellProductSearch"
-              name="sellProductSearch"
-              placeholder="Type product name..."
-              onkeyup="searchProducts(this.value, 'sellResults')"
-            />
+            <input type="text" id="sellProductSearch" name="sellProductSearch"
+            placeholder="Type product name..."
+            onkeyup="searchProducts(this.value, 'sellResults')"
+            autocomplete="off" {# 3. UX IMPROVEMENT: Disable browser
+            autocomplete #} />
             <div id="sellResults" class="search-results"></div>
           </div>
           <div class="form-group">
@@ -124,6 +152,7 @@
               name="sellQuantity"
               min="1"
               required
+              aria-required="true"
             />
           </div>
           <div class="form-actions">
@@ -141,26 +170,34 @@
     </div>
   </div>
 
-  <!-- Send to Clinic Modal -->
-  <div id="clinicProductModal" class="modal">
+  {# --- Send to Clinic Modal --- #}
+  <div
+    id="clinicProductModal"
+    class="modal"
+    role="dialog"
+    aria-labelledby="clinicProductHeader"
+  >
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Send Product to Clinic</h2>
-        <span class="close" onclick="closeModal('clinicProductModal')"
-          >&times;</span
+        <h2 id="clinicProductHeader">Send Product to Clinic</h2>
+        <button
+          type="button"
+          class="close"
+          onclick="closeModal('clinicProductModal')"
+          aria-label="Close"
         >
+          &times;
+        </button>
       </div>
       <div class="modal-body">
         <form id="clinicProductForm">
-          <div class="form-group">
+          <div class="form-group search-group">
             <label for="clinicProductSearch">Search Product:</label>
-            <input
-              type="text"
-              id="clinicProductSearch"
-              name="clinicProductSearch"
-              placeholder="Type product name..."
-              onkeyup="searchProducts(this.value, 'clinicResults')"
-            />
+            <input type="text" id="clinicProductSearch"
+            name="clinicProductSearch" placeholder="Type product name..."
+            onkeyup="searchProducts(this.value, 'clinicResults')"
+            autocomplete="off" {# 3. UX IMPROVEMENT: Disable browser
+            autocomplete #} />
             <div id="clinicResults" class="search-results"></div>
           </div>
           <div class="form-actions">
