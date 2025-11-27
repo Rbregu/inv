@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta http-equiv="refresh" content="300" />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
     <title>Clinic Product Manager</title>
     <link
       rel="stylesheet"
@@ -38,13 +38,7 @@
     </nav>
 
     <main class="main-content">{% block content %}{% endblock %}</main>
-    <script>
-  setInterval(() => {
-    location.reload();
-  }, 5 * 60 * 1000); // reload every 5 minutes
-</script>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-    
   </body>
 </html>
