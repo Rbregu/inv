@@ -61,10 +61,7 @@
       const input = document.getElementById('clinicSearchInput');
       const query = input.value.toLowerCase().trim();
       const resultsContainer = document.getElementById('clinicSearchResults');
-      const tableBody = document.getElementById('clinicProductsBody');
-      const noDataRow = document.getElementById('noClinicData');
 
-      // Clear previous results
       resultsContainer.innerHTML = '';
 
       if (query.length < 1) {
@@ -73,22 +70,24 @@
           return;
       }
 
-      // Find matching products for dropdown
-      const matchingProducts = allClinicProducts.filter(product =>
-          product.name.toLowerCase().includes(query)
-      );
+      // Find unique matching product names for the dropdown
+      const uniqueNames = [...new Set(
+          allClinicProducts
+              .filter(product => product.name.toLowerCase().includes(query))
+              .map(p => p.name)
+      )];
 
       // Show search results dropdown
-      if (matchingProducts.length > 0) {
-          matchingProducts.forEach(product => {
+      if (uniqueNames.length > 0) {
+          uniqueNames.forEach(name => {
               const div = document.createElement('div');
               div.className = 'search-result-item';
-              div.textContent = product.name;
+              div.textContent = name;
               div.onclick = () => {
-                  input.value = product.name;
+                  input.value = name;
                   resultsContainer.innerHTML = '';
                   // Filter table to show only this product
-                  filterClinicTable(product.name);
+                  filterClinicTable(name);
               };
               resultsContainer.appendChild(div);
           });
@@ -104,9 +103,7 @@
   }
 
   function filterClinicTable(filter) {
-      const tableBody = document.getElementById('clinicProductsBody');
-      const noDataRow = document.getElementById('noClinicData');
-
+      // No need to check for noDataRow here
       if (filter === '') {
           renderClinicProducts(allClinicProducts);
           return;
@@ -121,32 +118,24 @@
 
   function renderClinicProducts(products) {
       const tableBody = document.getElementById('clinicProductsBody');
-      const noDataRow = document.getElementById('noClinicData');
 
+      // Clear previous content
       tableBody.innerHTML = '';
 
       if (products.length === 0) {
-          if (!noDataRow) {
-              const row = document.createElement('tr');
-              row.id = 'noClinicData';
-              const cell = document.createElement('td');
-              cell.colSpan = 2;
-              cell.className = 'no-data';
-              cell.textContent = 'No products found';
-              row.appendChild(cell);
-              tableBody.appendChild(row);
-          } else {
-              noDataRow.style.display = '';
-              noDataRow.querySelector('.no-data').textContent = 'No products found';
-          }
+          // Create a temporary "No products found" row
+          const row = document.createElement('tr');
+          row.id = 'noClinicData';
+          const cell = document.createElement('td');
+          cell.colSpan = 2; // Span 2 columns
+          cell.className = 'no-data';
+          cell.textContent = 'No products found';
+          row.appendChild(cell);
+          tableBody.appendChild(row);
           return;
       }
 
-      // Hide the original no data row if it exists
-      if (noDataRow) {
-          noDataRow.style.display = 'none';
-      }
-
+      // Render rows for all filtered products
       products.forEach(product => {
           const row = document.createElement('tr');
           row.className = 'clinic-product-row';
